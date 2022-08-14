@@ -78,16 +78,17 @@ namespace dotnet_rpg.Services.CharacterService
             
             try
             {
-                Character character = characters.FirstOrDefault(c => c.Id == updatedCharacter.Id);
-                _mapper.Map(updatedCharacter, character);
+                var character = await _context.Characters
+                    .FirstOrDefaultAsync(c => c.Id == updatedCharacter.Id);
 
-
-                /*character.Name = updatedCharacter.Name;
+                character.Name = updatedCharacter.Name;
                 character.hitPoints = updatedCharacter.hitPoints;
                 character.Strength = updatedCharacter.Strength;
                 character.Defense = updatedCharacter.Defense;
                 character.Intelligence = updatedCharacter.Intelligence;
-                character.Class = updatedCharacter.Class;*/
+                character.Class = updatedCharacter.Class;
+
+                await _context.SaveChangesAsync();
 
                 serviceResponse.Data = _mapper.Map<GetCharacterDto>(character);
             } catch(Exception ex)
