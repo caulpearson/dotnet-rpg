@@ -1,4 +1,6 @@
-﻿namespace dotnet_rpg.Data
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace dotnet_rpg.Data
 {
     public class AuthRepository : IAuthRepository
     {
@@ -14,19 +16,29 @@
 
         public async Task<ServiceResponse<int>> Register(User user, string password)
         {
+            ServiceResponse<int> response = new ServiceResponse<int>();
+            if(await UserExists(user.Username))
+            {
+                response.Success = false;
+                response.Message = "User already exists";
+                return response;
+            }
             CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            ServiceResponse<int> response = new ServiceResponse<int>();
             response.Data = user.Id;
             return response;
         }
 
-        public Task<bool> UserExists(string username)
+        public async Task<bool> UserExists(string username)
         {
-            throw new NotImplementedException();
+            if(await _context.Users.AnyAsync(u => u.Username.ToLower() == username.ToLower()))
+            {
+                return true;
+            }
+            return false;
         }
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
