@@ -1,4 +1,5 @@
 ﻿using dotnet_rpg.Data;
+using dotnet_rpg.Dtos.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_rpg.Controllers
@@ -11,6 +12,18 @@ namespace dotnet_rpg.Controllers
         public AuthController(IAuthRepository authRepository)
         {
             _authRepository = authRepository;
+        }
+        [HttpPost("register")]
+        public async Task<ActionResult<ServiceResponse<int>>> Register(UserRegisterDto request)
+        {
+            var response = await _authRepository.Register(
+                new User { Username = request.Username }, request.Password
+            );
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
     }
 }
